@@ -1,0 +1,637 @@
+@import "tailwindcss";
+
+@theme {
+  --font-serif: "Cormorant Garamond", "Playfair Display", Georgia, serif;
+  --font-sans: "DM Sans", Inter, sans-serif;
+}
+
+:root {
+  /* Dynamic Design System Variables (Warm by Default) */
+  --bg-primary: #0a0807; /* Dark Walnut */
+  --bg-panel: rgba(22, 18, 15, 0.55);
+  --border-copper: rgba(161, 102, 63, 0.22);
+  --color-text-primary: #fbf8f3;
+  --color-text-secondary: #ebdcc5;
+  --color-text-muted: #7d6855;
+  --color-accent: #d2652a; /* Copper/Amber */
+  --color-accent-glow: rgba(210, 101, 42, 0.35);
+  --filter-saturation: saturate(1.15) contrast(1.05);
+  --ambient-reflection: rgba(255, 230, 200, 0.08);
+  --vinyl-grooves-opacity: 0.88;
+
+  /* Theme Engine Morphing Custom Variables */
+  --vinyl-reflection-opacity: 0.65;
+  --vinyl-dust-opacity: 0.35;
+  --noise-opacity: 0.055;
+  --flame-scale: 1.0;
+  --flame-glow-color: rgba(240, 106, 37, 0.45);
+  --flame-core-color: #ffe082;
+  --flame-outer-color: rgba(240, 106, 37, 0.7);
+  --dust-color: rgba(255, 230, 200, 0.4);
+  --typography-glow: 0px 0px 0px rgba(0,0,0,0);
+  --glass-reflection: rgba(255, 230, 200, 0.08);
+}
+
+/* Cold Theme State (When Valve is off, steel cold fallback overrides) */
+.theme-cold {
+  --bg-primary: #0b0c0e !important;
+  --bg-panel: rgba(20, 22, 25, 0.5) !important;
+  --border-copper: rgba(111, 124, 140, 0.15) !important;
+  --color-text-primary: #dcdfe3 !important;
+  --color-text-secondary: #a3aab3 !important;
+  --color-text-muted: #5e646d !important;
+  --color-accent: #6f7c8c !important; /* Cold Steel */
+  --color-accent-glow: rgba(111, 124, 140, 0.08) !important;
+  --filter-saturation: saturate(0.35) brightness(0.85) contrast(0.95) !important;
+  --ambient-reflection: rgba(100, 120, 150, 0.02) !important;
+  --vinyl-grooves-opacity: 0.45 !important;
+  --flame-scale: 0 !important;
+  --flame-glow-color: rgba(0,0,0,0) !important;
+  --typography-glow: none !important;
+}
+
+@layer base {
+  body {
+    background-color: var(--bg-primary);
+    color: var(--color-text-primary);
+    overflow: hidden;
+    height: 100vh;
+    width: 100vw;
+    font-family: "Cormorant Garamond", serif;
+    margin: 0;
+    padding: 0;
+    transition: background-color 0.8s ease;
+  }
+}
+
+/* ── Immersive Listening Operating System Layout ───────────────── */
+.listening-room {
+  width: 100vw;
+  height: 100vh;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--bg-primary);
+  filter: var(--filter-saturation);
+}
+
+/* ── Ambient Radial Glows ────────────────────────────────────────── */
+.ambient-glow {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  opacity: var(--glow-opacity, 0.75);
+  background: 
+    radial-gradient(circle at 85% 20%, var(--color-accent-glow) 0%, transparent 60%),
+    radial-gradient(circle at 15% 50%, var(--ambient-reflection) 0%, transparent 70%);
+}
+
+/* ── Stage-Specific Atmospheric Overlays ────────────────────────── */
+
+/* ── Three-Panel Operating System Structure ───────────────────── */
+.os-container {
+  display: grid;
+  grid-template-columns: 340px 1fr 340px;
+  width: 100%;
+  height: 100vh;
+  z-index: 10;
+  position: relative;
+  box-sizing: border-box;
+}
+
+.os-panel {
+  background: var(--bg-panel);
+  border-right: 1px solid var(--border-copper);
+  display: flex;
+  flex-direction: column;
+  padding: 30px;
+  box-sizing: border-box;
+  overflow: hidden;
+  backdrop-filter: blur(8px);
+}
+
+.os-panel-right {
+  border-right: none;
+  border-left: 1px solid var(--border-copper);
+}
+
+.os-center-viewport {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+  padding: 30px;
+  box-sizing: border-box;
+}
+
+
+
+/* ── Physical Vacuum Tube pre-amp component ─────────────────────── */
+.vacuum-tube-valve {
+  position: relative;
+  width: 72px;
+  height: 120px;
+  border-radius: 36px 36px 4px 4px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.01) 60%, rgba(255,255,255,0.08) 100%);
+  border: 1px solid rgba(255,255,255,0.12);
+  box-shadow: 
+    0 8px 20px rgba(0,0,0,0.4),
+    inset 0 4px 6px rgba(255,255,255,0.08),
+    inset 0 -4px 10px rgba(0,0,0,0.8);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  padding-bottom: 12px;
+  cursor: pointer;
+  box-sizing: border-box;
+  transition: border-color 1.5s ease;
+}
+
+/* Glass Glare reflections */
+.vacuum-tube-valve::before {
+  content: '';
+  position: absolute;
+  top: 8px;
+  left: 12px;
+  right: 12px;
+  height: 45px;
+  border-radius: 20px 20px 0 0;
+  background: linear-gradient(180deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0) 100%);
+  pointer-events: none;
+}
+
+/* Glowing filament behind tube when active */
+.vacuum-tube-filament {
+  position: absolute;
+  bottom: 24px;
+  width: 14px;
+  height: 38px;
+  border-radius: 7px;
+  background: var(--flame-glow-color);
+  box-shadow: 0 0 25px 8px var(--flame-glow-color);
+  transform: scale(var(--flame-scale));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.vacuum-tube-base {
+  width: 80px;
+  height: 14px;
+  background: linear-gradient(90deg, #1e1916 0%, #3e332c 40%, #5d4d42 50%, #3e332c 60%, #1e1916 100%);
+  border-bottom: 2px solid #100d0b;
+  border-radius: 3px;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.6);
+  z-index: 15;
+}
+
+/* Wisp of smoke for blown out valve */
+.smoke-wisp {
+  position: absolute;
+  width: 1px;
+  height: 45px;
+  background: linear-gradient(to top, rgba(180,180,180,0.25) 0%, rgba(180,180,180,0) 100%);
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  pointer-events: none;
+  filter: blur(1px);
+  animation: smoke-rise 4.5s ease-out forwards;
+}
+
+@keyframes smoke-rise {
+  0% { transform: translateX(-50%) translateY(0) scaleX(1); opacity: 0.85; }
+  100% { transform: translateX(-30%) translateY(-70px) scaleX(3.5); opacity: 0; }
+}
+
+/* ── Custom Tactile Dials (Copper plates) ────────────────────────── */
+.copper-knob-plate {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  cursor: ns-resize;
+  user-select: none;
+}
+
+.copper-knob-ring {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 45% 45%, #8a5737 0%, #442a19 70%, #20130a 100%);
+  border: 1px solid rgba(161, 102, 63, 0.35);
+  box-shadow: 
+    0 5px 12px rgba(0,0,0,0.65), 
+    inset 0 1px 1px rgba(255,255,255,0.05);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.05s linear;
+}
+
+.copper-knob-dial {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 40% 40%, #b3734a 0%, #683e23 80%, #301b0e 100%);
+  position: relative;
+  box-shadow: inset 0 1px 2px rgba(255,255,255,0.08);
+}
+
+/* Dial pointer dot */
+.copper-knob-dot {
+  position: absolute;
+  width: 3.5px;
+  height: 3.5px;
+  border-radius: 50%;
+  background: var(--color-accent);
+  top: 3.5px;
+  left: 50%;
+  transform: translateX(-50%);
+  box-shadow: 0 0 3px var(--color-accent);
+}
+
+.dial-label-engraved {
+  font-family: "DM Sans", sans-serif;
+  font-weight: 900;
+  font-size: 0.55rem;
+  letter-spacing: 0.22em;
+  text-align: center;
+  color: var(--color-text-muted);
+}
+
+.dial-stage-sub {
+  font-family: "Cormorant Garamond", serif;
+  font-style: italic;
+  font-size: 0.75rem;
+  opacity: 0.45;
+  color: var(--color-text-secondary);
+  margin-top: -3px;
+}
+
+/* ── Interactive Jumping VU Levels ───────────────────────────────── */
+.vu-rack {
+  display: flex;
+  gap: 3.5px;
+  height: 55px;
+  align-items: flex-end;
+  background: rgba(0,0,0,0.22);
+  border: 1px solid var(--border-copper);
+  padding: 6px 12px;
+  border-radius: 4px;
+  box-shadow: inset 0 2px 5px rgba(0,0,0,0.6);
+}
+
+.vu-bar {
+  flex: 1;
+  width: 5px;
+  height: 100%;
+  display: flex;
+  flex-direction: column-reverse;
+  gap: 2.5px;
+}
+
+.vu-dot {
+  width: 5px;
+  height: 3px;
+  border-radius: 0.5px;
+  background-color: rgba(210, 101, 42, 0.05);
+  transition: background-color 0.06s ease, box-shadow 0.06s ease;
+}
+
+.theme-warm .vu-dot.level-active-low {
+  background-color: #d2652a;
+  box-shadow: 0 0 3px rgba(210, 101, 42, 0.4);
+}
+.theme-warm .vu-dot.level-active-mid {
+  background-color: #e5873a;
+  box-shadow: 0 0 4px rgba(229, 135, 58, 0.5);
+}
+.theme-warm .vu-dot.level-active-high {
+  background-color: #f05220;
+  box-shadow: 0 0 6px rgba(240, 82, 32, 0.7);
+}
+
+.theme-cold .vu-dot.level-active-low,
+.theme-cold .vu-dot.level-active-mid,
+.theme-cold .vu-dot.level-active-high {
+  background-color: #6f7c8c;
+  box-shadow: 0 0 2px rgba(111, 124, 140, 0.2);
+}
+
+/* ── Physical Vinyl Platter components ──────────────────────────── */
+.vinyl-platter-chassis {
+  position: relative;
+  border-radius: 50%;
+  background: radial-gradient(circle at 45% 45%, #181512 0%, #080605 100%);
+  box-shadow: 
+    0 40px 90px rgba(0, 0, 0, 0.9),
+    inset 0 2px 5px rgba(255,255,255,0.03),
+    inset 0 -2px 5px rgba(0,0,0,0.85);
+  transition: box-shadow 1.8s ease;
+}
+
+.theme-warm .vinyl-platter-chassis {
+  box-shadow: 
+    0 40px 90px rgba(0, 0, 0, 0.9),
+    0 0 50px rgba(210, 101, 42, 0.04),
+    inset 0 2px 5px rgba(255, 245, 230, 0.02);
+  transition: box-shadow 0.8s ease;
+}
+
+/* ── Platter Chassis Selection Glows ── */
+.listening-room.stage-attraction .vinyl-platter-chassis {
+  box-shadow: 0 40px 90px rgba(0, 0, 0, 0.95), 0 0 45px rgba(251, 248, 243, 0.1);
+}
+.listening-room.stage-longing .vinyl-platter-chassis {
+  box-shadow: 0 40px 90px rgba(0, 0, 0, 0.95), 0 0 50px rgba(240, 106, 37, 0.16);
+}
+.listening-room.stage-obsession .vinyl-platter-chassis {
+  box-shadow: 0 40px 90px rgba(0, 0, 0, 0.95), 0 0 55px rgba(220, 20, 20, 0.22);
+}
+.listening-room.stage-burning .vinyl-platter-chassis {
+  box-shadow: 0 40px 90px rgba(0, 0, 0, 0.95), 0 0 60px rgba(255, 140, 0, 0.25);
+}
+.listening-room.stage-surrender .vinyl-platter-chassis {
+  box-shadow: 0 40px 90px rgba(0, 0, 0, 0.98), 0 0 35px rgba(40, 35, 30, 0.06);
+}
+.listening-room.stage-immortality .vinyl-platter-chassis {
+  box-shadow: 0 40px 90px rgba(0, 0, 0, 0.95), 0 0 55px rgba(138, 43, 226, 0.2);
+}
+
+.vinyl-disc {
+  position: relative;
+  border-radius: 50%;
+  background: repeating-radial-gradient(
+    circle,
+    #050403 0px,
+    #050403 0.8px,
+    #0c0b0a 1.4px,
+    #131211 2.2px,
+    #050403 3px
+  );
+  opacity: var(--vinyl-grooves-opacity);
+  box-shadow: 
+    inset 0 0 130px rgba(0, 0, 0, 0.99),
+    0 0 0 1px rgba(0,0,0,0.9);
+  transition: opacity 1.8s ease, transform 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.vinyl-disc:hover {
+  transform: scale(1.01);
+}
+
+/* Real-looking conic reflection sheen */
+.vinyl-sheen {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: conic-gradient(
+    from 80deg,
+    transparent 0deg,
+    rgba(255, 255, 255, 0.04) 25deg,
+    rgba(255, 240, 220, 0.1) 40deg,
+    rgba(255, 255, 255, 0.04) 55deg,
+    transparent 90deg,
+    transparent 180deg,
+    rgba(255, 255, 255, 0.04) 205deg,
+    rgba(255, 240, 220, 0.1) 220deg,
+    rgba(255, 255, 255, 0.04) 235deg,
+    transparent 270deg,
+    transparent 360deg
+  );
+  mix-blend-mode: screen;
+  pointer-events: none;
+  opacity: 0.65;
+  transition: opacity 1.8s ease;
+}
+
+.theme-cold .vinyl-sheen {
+  background: conic-gradient(
+    from 80deg,
+    transparent 0deg,
+    rgba(255, 255, 255, 0.02) 25deg,
+    rgba(255, 255, 255, 0.05) 40deg,
+    rgba(255, 255, 255, 0.02) 55deg,
+    transparent 90deg,
+    transparent 180deg,
+    rgba(255, 255, 255, 0.02) 205deg,
+    rgba(255, 255, 255, 0.05) 220deg,
+    rgba(255, 255, 255, 0.02) 235deg,
+    transparent 270deg,
+    transparent 360deg
+  );
+  opacity: 0.3;
+}
+
+/* Vinyl dust specs */
+.vinyl-dust-overlay {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  pointer-events: none;
+  background-image: 
+    radial-gradient(circle at 35% 25%, rgba(255,255,255,0.07) 0.5px, transparent 1.5px),
+    radial-gradient(circle at 80% 30%, rgba(255,255,255,0.05) 0.8px, transparent 2px),
+    radial-gradient(circle at 55% 78%, rgba(255,255,255,0.06) 0.4px, transparent 1.5px),
+    radial-gradient(circle at 20% 65%, rgba(255,255,255,0.08) 0.6px, transparent 1.5px);
+  mix-blend-mode: screen;
+  opacity: 0.35;
+}
+
+/* ── Typography & Index styling ──────────────────────────────────── */
+.os-title {
+  font-family: "Playfair Display", serif;
+  font-size: 2.1rem;
+  font-weight: 400;
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+}
+
+.os-sub {
+  font-family: "DM Sans", sans-serif;
+  font-weight: 700;
+  font-size: 0.55rem;
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+}
+
+.os-quote-box {
+  border-left: 1px solid var(--border-copper);
+  padding-left: 18px;
+  margin: 15px 0;
+  box-sizing: border-box;
+}
+
+.os-poetic-quote {
+  font-family: "Cormorant Garamond", serif;
+  font-size: 1.25rem;
+  font-style: italic;
+  line-height: 1.35;
+  opacity: 0.8;
+}
+
+/* ── Chapter Item index ────────────────────────────────────────── */
+.chapter-item {
+  position: relative;
+  cursor: pointer;
+  transition: all 0.35s cubic-bezier(0.25, 1, 0.5, 1);
+  border-bottom: 1px solid rgba(255, 230, 200, 0.03);
+  padding: 14px 0;
+}
+
+.theme-cold .chapter-item {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.02);
+}
+
+.chapter-item:hover {
+  transform: translateX(6px);
+}
+
+.chapter-number {
+  font-family: "Playfair Display", serif;
+  font-size: 1.4rem;
+  font-style: italic;
+  transition: color 0.35s ease;
+}
+
+.chapter-title {
+  font-family: "Cormorant Garamond", serif;
+  font-size: 1.18rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  transition: color 0.35s ease;
+}
+
+.chapter-urdu {
+  font-size: 1.1rem;
+  font-family: "Cormorant Garamond", serif;
+  opacity: 0.4;
+  transition: opacity 0.35s ease;
+}
+
+.chapter-meta {
+  font-family: "DM Sans", sans-serif;
+  font-size: 0.55rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  opacity: 0.35;
+}
+
+/* ── Poetic Play trigger button ──────────────────────────────────── */
+.poetic-trigger-btn {
+  font-family: "Cormorant Garamond", serif;
+  font-size: 0.95rem;
+  font-style: italic;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-text-primary);
+  background: transparent;
+  border: 1px solid var(--border-copper);
+  padding: 10px 24px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.4s ease;
+}
+
+.poetic-trigger-btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--color-accent);
+  opacity: 0;
+  z-index: -1;
+  transition: opacity 0.4s ease;
+}
+
+.poetic-trigger-btn:hover {
+  border-color: var(--color-accent);
+  color: #fff;
+  letter-spacing: 0.08em;
+  box-shadow: 0 0 15px var(--color-accent-glow);
+}
+
+.poetic-trigger-btn:hover::before {
+  opacity: 1;
+}
+
+/* ── Custom Timeline Slider ──────────────────────────────────────── */
+.timeline-slider {
+  -webkit-appearance: none;
+  width: 100%;
+  height: 1px;
+  background: var(--color-text-muted);
+  outline: none;
+  cursor: pointer;
+  transition: background 0.3s ease;
+  opacity: 0.4;
+}
+
+.timeline-slider:hover {
+  background: var(--color-text-secondary);
+  opacity: 0.7;
+}
+
+.timeline-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--color-accent);
+  cursor: pointer;
+  transition: transform 0.2s ease, background-color 0.2s ease;
+}
+
+.timeline-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.5);
+  background: var(--color-text-primary);
+}
+
+/* ── Custom Scrollbars ───────────────────────────────────────────── */
+.custom-scroll::-webkit-scrollbar {
+  width: 2px;
+}
+.custom-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+.custom-scroll::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.04);
+}
+.custom-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(255,255,255,0.12);
+}
+
+/* ── High-Fidelity Custom Stage Visual Overlays ────────────────── */
+
+/* Stage 1: Soft breathing background glow animation */
+@keyframes ambient-breath {
+  0%, 100% { opacity: 0.35; }
+  50% { opacity: 0.55; }
+}
+
+.ambient-glow {
+  animation: ambient-breath 10s ease-in-out infinite;
+  opacity: 0.45;
+}
+
+
+
+/* Vinyl platter chassis soft natural ambient shadow */
+.vinyl-platter-chassis::after {
+  content: '';
+  position: absolute;
+  inset: -15px;
+  border-radius: 50%;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+  pointer-events: none;
+  z-index: -1;
+}
+
+
+

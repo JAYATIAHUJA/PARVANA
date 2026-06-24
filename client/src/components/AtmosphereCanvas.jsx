@@ -1,14 +1,21 @@
 import React, { useState, useEffect, useRef, useMemo, Suspense } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import { Sparkles, useGLTF, useAnimations, MeshPortalMaterial, Text } from '@react-three/drei';
+import { Sparkles, useGLTF, useAnimations, MeshPortalMaterial } from '@react-three/drei';
 import { EffectComposer, Bloom, Vignette, Noise, DepthOfField, ChromaticAberration } from '@react-three/postprocessing';
 import * as THREE from 'three';
 import gsap from 'gsap';
 import vertShader from '../shaders/atmosphere.vert.glsl';
 import fragShader from '../shaders/atmosphere.frag.glsl';
-import flameVertShader from '../shaders/flame.vert.glsl';
-import flameFragShader from '../shaders/flame.frag.glsl';
 import mothModelUrl from '../assets/models/giant_peacock_moth.glb';
+
+// Modular Stage Imports
+import EmberParticles from '../stages/stage4_destruction/EmberParticles';
+import Stage1World from '../stages/stage1_attraction/PortalWorld';
+import Stage2World from '../stages/stage2_longing/PortalWorld';
+import Stage3World from '../stages/stage3_obsession/PortalWorld';
+import Stage4World from '../stages/stage4_destruction/PortalWorld';
+import Stage5World from '../stages/stage5_surrender/PortalWorld';
+import Stage6World from '../stages/stage6_immortality/PortalWorld';
 
 function ShaderBackground({ currentTrackId, isFlameOn, flameIntensity, audioBandsRef, setStageA, stageA, stageB, setStageB }) {
   const materialRef = useRef();
@@ -91,68 +98,7 @@ function ShaderBackground({ currentTrackId, isFlameOn, flameIntensity, audioBand
   );
 }
 
-// Custom volumetric rising embers for Stage 4
-function EmberParticles({ count = 30 }) {
-  const pointsRef = useRef();
-  
-  const [positions, speeds, phases] = useMemo(() => {
-    const pos = new Float32Array(count * 3);
-    const spd = new Float32Array(count);
-    const phs = new Float32Array(count);
-    for (let i = 0; i < count; i++) {
-      pos[i * 3] = (Math.random() - 0.5) * 5.0; // x
-      pos[i * 3 + 1] = (Math.random() - 0.5) * 4.0; // y
-      pos[i * 3 + 2] = (Math.random() - 0.5) * 1.5; // z
-      spd[i] = 0.3 + Math.random() * 0.4;
-      phs[i] = Math.random() * Math.PI * 2.0;
-    }
-    return [pos, spd, phs];
-  }, [count]);
-
-  useFrame((state, delta) => {
-    if (!pointsRef.current) return;
-    const geo = pointsRef.current.geometry;
-    const posAttr = geo.attributes.position;
-    const time = state.clock.getElapsedTime();
-
-    for (let i = 0; i < count; i++) {
-      let y = posAttr.getY(i);
-      y += speeds[i] * delta * 1.8;
-      
-      // Loop back to bottom
-      if (y > 2.5) {
-        y = -2.5;
-        posAttr.setX(i, (Math.random() - 0.5) * 5.0);
-      }
-      
-      posAttr.setY(i, y);
-      
-      let x = posAttr.getX(i);
-      x += Math.sin(time + phases[i]) * 0.004;
-      posAttr.setX(i, x);
-    }
-    posAttr.needsUpdate = true;
-  });
-
-  return (
-    <points ref={pointsRef}>
-      <bufferGeometry>
-        <bufferAttribute
-          attach="attributes-position"
-          args={[positions, 3]}
-        />
-      </bufferGeometry>
-      <pointsMaterial
-        color="#ff7f24"
-        size={0.055}
-        transparent
-        opacity={0.85}
-        blending={THREE.AdditiveBlending}
-        depthWrite={false}
-      />
-    </points>
-  );
-}
+// EmberParticles is now imported from stages/stage4_destruction/EmberParticles.jsx
 
 // Stage-specific particle system switch
 function AtmosphereParticles({ stage, audioBandsRef, currentTime, duration }) {
@@ -445,116 +391,6 @@ function PostEffects({ stage }) {
   );
 }
 
-// Sub-component for Stage 4 flame mesh inside the portal
-function PortalFlameMesh({ isFlameOn, flameIntensity }) {
-  const materialRef = useRef();
-
-  useFrame((state) => {
-    if (materialRef.current) {
-      materialRef.current.uniforms.uTime.value = state.clock.getElapsedTime();
-    }
-  });
-
-  return (
-    <mesh position={[0, -0.15, 0]}>
-      <planeGeometry args={[0.6, 1.2]} />
-      <shaderMaterial
-        ref={materialRef}
-        vertexShader={flameVertShader}
-        fragmentShader={flameFragShader}
-        transparent={true}
-        depthWrite={false}
-        uniforms={{
-          uTime: { value: 0 },
-          uIntensity: { value: flameIntensity * 1.5 }
-        }}
-      />
-    </mesh>
-  );
-}
-
-// Sub-component for Stage 3 Torus
-function ObsessionTorus({ audioBandsRef }) {
-  const torusRef = useRef();
-
-  useFrame(() => {
-    if (torusRef.current) {
-      const bass = audioBandsRef?.current?.bass || 0.0;
-      const high = audioBandsRef?.current?.high || 0.0;
-      
-      torusRef.current.rotation.x += 0.025 + high * 0.18;
-      torusRef.current.rotation.y += 0.03 + bass * 0.12;
-
-      const scale = 1.0 + bass * 0.4;
-      torusRef.current.scale.set(scale, scale, scale);
-    }
-  });
-
-  return (
-    <mesh ref={torusRef}>
-      <torusKnotGeometry args={[0.24, 0.07, 120, 16]} />
-      <meshBasicMaterial color="#8e1b1b" wireframe />
-    </mesh>
-  );
-}
-
-// Helper sub-component for rendering the moth model inside the portal space
-function PortalMoth({ wireframe = false, color = null, scale = 0.3, speedFactor = 1.0 }) {
-  const groupRef = useRef();
-  const { scene, animations } = useGLTF(mothModelUrl);
-  const { actions } = useAnimations(animations, groupRef);
-
-  const clonedScene = useMemo(() => {
-    const s = scene.clone();
-    s.traverse((child) => {
-      if (child.isMesh) {
-        child.castShadow = false;
-        child.receiveShadow = false;
-        if (wireframe) {
-          child.material = new THREE.MeshBasicMaterial({
-            color: 0xff4500,
-            wireframe: true,
-            transparent: true,
-            opacity: 0.7
-          });
-        } else if (color !== null) {
-          child.material = new THREE.MeshBasicMaterial({
-            color: color,
-            transparent: true,
-            opacity: 0.35
-          });
-        }
-      }
-    });
-    return s;
-  }, [scene, wireframe, color]);
-
-  useEffect(() => {
-    const actionNames = Object.keys(actions);
-    if (actionNames.length > 0) {
-      const action = actions[actionNames[0]];
-      if (action) {
-        action.reset().fadeIn(0.25).play();
-        action.setEffectiveTimeScale(isFinite(speedFactor) ? 1.8 * speedFactor : 0.0);
-      }
-    }
-  }, [actions, speedFactor]);
-
-  useFrame((state) => {
-    if (groupRef.current && speedFactor > 0.01) {
-      const t = state.clock.getElapsedTime();
-      groupRef.current.position.y = Math.sin(t * 2.2) * 0.06;
-      groupRef.current.rotation.y = Math.sin(t * 0.8) * 0.15;
-    }
-  });
-
-  return (
-    <group ref={groupRef}>
-      <primitive object={clonedScene} scale={scale} />
-    </group>
-  );
-}
-
 function PortalWorld({ stage, audioBandsRef, isFlameOn, flameIntensity }) {
   const groupRef = useRef();
 
@@ -569,110 +405,12 @@ function PortalWorld({ stage, audioBandsRef, isFlameOn, flameIntensity }) {
       <ambientLight intensity={0.8} />
       <pointLight position={[0, 3, 3]} intensity={2.0} color="#ffffff" />
 
-      {stage === 1 && (
-        <group>
-          {/* Golden Sun sphere */}
-          <mesh>
-            <sphereGeometry args={[0.2, 32, 32]} />
-            <meshBasicMaterial color="#f4d19b" />
-          </mesh>
-          <Sparkles count={60} scale={[2.0, 2.0, 2.0]} color="#f4d19b" size={1.8} speed={0.4} />
-          <Text position={[0, 0.35, 0]} fontSize={0.045} color="#f4d19b" anchorX="center" anchorY="middle">
-            बंदा काम का
-          </Text>
-          <Text position={[0, -0.35, 0]} fontSize={0.035} color="#ebdcc5" anchorX="center" anchorY="middle">
-            RAHA NA MAIN BANDA KAAM KA
-          </Text>
-        </group>
-      )}
-
-      {stage === 2 && (
-        <group>
-          {/* Moon model */}
-          <mesh position={[0, 0.05, 0]}>
-            <sphereGeometry args={[0.18, 32, 32]} />
-            <meshStandardMaterial color="#afc5ff" roughness={0.7} emissive="#5b4ca5" emissiveIntensity={0.4} />
-          </mesh>
-          
-          {/* Silhouette Moth floating in twilight */}
-          <group position={[0, -0.05, 0.05]}>
-            <PortalMoth color={0x000000} scale={0.25} speedFactor={0.5} />
-          </group>
-
-          <Sparkles count={45} scale={[2.0, 2.0, 2.0]} color="#b47aff" size={1.2} speed={0.2} />
-          <Text position={[0, 0.35, 0]} fontSize={0.045} color="#b47aff" anchorX="center" anchorY="middle">
-            इस तरह
-          </Text>
-          <Text position={[0, -0.35, 0]} fontSize={0.035} color="#dcdfe3" anchorX="center" anchorY="middle">
-            DROWNING IN THE TWILIGHT
-          </Text>
-        </group>
-      )}
-
-      {stage === 3 && (
-        <group>
-          {/* Audio-reactive Torus Knot */}
-          <ObsessionTorus audioBandsRef={audioBandsRef} />
-          <Sparkles count={75} scale={[2.0, 2.0, 2.0]} color="#8e1b1b" size={1.4} speed={2.0} />
-          <Text position={[0, 0.45, 0]} fontSize={0.045} color="#8e1b1b" anchorX="center" anchorY="middle">
-            तू क्यों ना मुझे देखती?
-          </Text>
-        </group>
-      )}
-
-      {stage === 4 && (
-        <group>
-          {/* Volumetric Flame */}
-          <PortalFlameMesh isFlameOn={isFlameOn} flameIntensity={flameIntensity} />
-          
-          {/* Wireframe Moth burning in the flame */}
-          <group position={[0.2, 0.1, 0.05]} rotation={[0.4, 0.5, 0.3]}>
-            <PortalMoth wireframe scale={0.2} speedFactor={1.5} />
-          </group>
-
-          <Sparkles count={55} scale={[1.8, 2.2, 1.8]} color="#ff7f24" size={1.2} speed={1.5} />
-          <Text position={[0, -0.5, 0]} fontSize={0.045} color="#ff6b00" anchorX="center" anchorY="middle">
-            I ACCEPT THE FIRE
-          </Text>
-        </group>
-      )}
-
-      {stage === 5 && (
-        <group>
-          {/* Moon Sphere */}
-          <mesh>
-            <sphereGeometry args={[0.22, 32, 32]} />
-            <meshStandardMaterial color="#afc5ff" roughness={0.8} emissive="#2d3855" emissiveIntensity={0.6} />
-          </mesh>
-          <Sparkles count={40} scale={[2.2, 2.2, 2.2]} color="#afc5ff" size={1.0} speed={0.15} />
-          <Text position={[0, 0.35, 0]} fontSize={0.045} color="#afc5ff" anchorX="center" anchorY="middle">
-            चांद
-          </Text>
-          <Text position={[0, -0.35, 0]} fontSize={0.035} color="#e6edff" anchorX="center" anchorY="middle">
-            I LET GO AND FOUND PEACE
-          </Text>
-        </group>
-      )}
-
-      {stage === 6 && (
-        <group>
-          {/* White Gold Cylinder Pillar */}
-          <mesh position={[0, -0.1, 0]}>
-            <cylinderGeometry args={[0.06, 0.06, 0.7, 32]} />
-            <meshStandardMaterial color="#ffffff" roughness={0.2} emissive="#ffd68a" emissiveIntensity={1.0} />
-          </mesh>
-
-          {/* Golden Moth resting still in the light column */}
-          <group position={[0, 0, 0.08]} rotation={[0.1, Math.PI, 0]}>
-            <PortalMoth scale={0.28} speedFactor={0.0} />
-          </group>
-
-          <Sparkles count={70} scale={[2.0, 2.0, 2.0]} color="#ffd68a" size={1.5} speed={0.35} />
-          <Text position={[0, 0.45, 0]} fontSize={0.04} color="#ffd68a" anchorX="center" anchorY="middle">
-            I BECAME THE LIGHT
-          </Text>
-        </group>
-      )}
+      {stage === 1 && <Stage1World />}
+      {stage === 2 && <Stage2World />}
+      {stage === 3 && <Stage3World audioBandsRef={audioBandsRef} />}
+      {stage === 4 && <Stage4World isFlameOn={isFlameOn} flameIntensity={flameIntensity} />}
+      {stage === 5 && <Stage5World />}
+      {stage === 6 && <Stage6World />}
     </group>
   );
 }

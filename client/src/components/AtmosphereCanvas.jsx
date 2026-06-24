@@ -565,7 +565,7 @@ function PortalWorld({ stage, audioBandsRef, isFlameOn, flameIntensity }) {
   });
 
   return (
-    <group ref={groupRef}>
+    <group ref={groupRef} position={[0, 0, -1.0]}>
       <ambientLight intensity={0.8} />
       <pointLight position={[0, 3, 3]} intensity={2.0} color="#ffffff" />
 

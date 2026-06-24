@@ -10,7 +10,8 @@ export default function Turntable({
   duration,
   isFlameOn,
   flameIntensity,
-  audioBandsRef
+  audioBandsRef,
+  onPortalTrigger
 }) {
   const recordRef = useRef(null);
   const reflectionRef = useRef(null);
@@ -188,6 +189,10 @@ export default function Turntable({
         {/* Center label */}
         <div
           className="relative flex items-center justify-center z-10"
+          onClick={(e) => {
+            e.stopPropagation();
+            if (onPortalTrigger) onPortalTrigger();
+          }}
           style={{
             width: '150px',
             height: '150px',
@@ -196,6 +201,7 @@ export default function Turntable({
             border: '1.5px solid rgba(161, 102, 63, 0.22)',
             boxShadow: 'inset 0 4px 12px rgba(0, 0, 0, 0.9)',
             overflow: 'hidden',
+            cursor: 'zoom-in',
           }}
         >
           {/* Faded album sleeve visualizer background */}

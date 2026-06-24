@@ -329,6 +329,29 @@ export default function App() {
   const [showSmoke, setShowSmoke] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
+
+  // Portal State & Transition
+  const [isPortalOpen, setIsPortalOpen] = useState(false);
+
+  useEffect(() => {
+    if (isPortalOpen) {
+      gsap.to('.os-container', {
+        opacity: 0,
+        duration: 1.2,
+        ease: 'power2.inOut',
+        onComplete: () => {
+          gsap.set('.os-container', { display: 'none', pointerEvents: 'none' });
+        }
+      });
+    } else {
+      gsap.set('.os-container', { display: 'grid', pointerEvents: 'auto' });
+      gsap.to('.os-container', {
+        opacity: 1,
+        duration: 1.2,
+        ease: 'power2.inOut'
+      });
+    }
+  }, [isPortalOpen]);
   const [activeHoverStage, setActiveHoverStage] = useState(null);
 
   const containerRef = useRef(null);
@@ -688,7 +711,19 @@ export default function App() {
         audioBandsRef={audioBandsRef}
         currentTime={currentTime}
         duration={duration}
+        isPortalOpen={isPortalOpen}
       />
+
+      {/* Portal Exit Button overlay */}
+      {isPortalOpen && (
+        <button
+          onClick={() => setIsPortalOpen(false)}
+          className="absolute top-8 right-10 font-serif italic text-sm tracking-widest hover:text-[var(--color-accent)] transition-colors duration-300 z-50 pointer-events-auto bg-transparent border border-[var(--border-copper)] px-4 py-1.5 cursor-pointer text-[var(--color-text-primary)]"
+          style={{ textShadow: 'var(--typography-glow)' }}
+        >
+          [ Exit Portal ]
+        </button>
+      )}
 
       {/* Dynamic Ambient Glow */}
       <div className="ambient-glow" />
@@ -813,6 +848,7 @@ export default function App() {
               isFlameOn={isFlameOn}
               flameIntensity={flameIntensity}
               audioBandsRef={audioBandsRef}
+              onPortalTrigger={() => setIsPortalOpen(true)}
             />
 
             {/* Timeline track progress */}
